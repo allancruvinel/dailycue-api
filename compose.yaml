@@ -8,3 +8,12 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 5087:5087
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=dailycue
+      - POSTGRES_PASSWORD=Dailycue@123
+      - POSTGRES_DB=dailycue
+    ports:
+      - 5432:5432
