@@ -1,14 +1,6 @@
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
 
 services:
-  dailycueapi:
-    image: dailycueapi
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      - 5087:5087
-
   db:
     image: postgres:13-alpine
     environment:

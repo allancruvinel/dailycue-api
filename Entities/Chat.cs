@@ -11,7 +11,7 @@ public class Chat
 
     [ForeignKey("User")]
     public long UserId { get; set; }
-    public User User { get; set; }
+    public required User User { get; set; }
     public string? Name { get; set; }
     public string? Provider { get; set; }
     public string? WebhookUrl { get; set; }

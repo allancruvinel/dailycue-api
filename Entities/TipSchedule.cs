@@ -11,13 +11,13 @@ public class TipSchedule
 
     [ForeignKey("Tip")]
     public long TipId { get; set; }
-    public Tip Tip { get; set; }
+    public required Tip Tip { get; set; }
 
     [Required]
     public DateTime ScheduledAt { get; set; }
 
     [Required]
-    public string Status { get; set; }
+    public required string Status { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; }

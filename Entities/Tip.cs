@@ -11,7 +11,7 @@ public class Tip
 
     [ForeignKey("Chat")]
     public long ChatId { get; set; }
-    public Chat Chat { get; set; }
+    public required Chat Chat { get; set; }
     public string? ContentText { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
