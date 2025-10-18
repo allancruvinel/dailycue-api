@@ -1,5 +1,6 @@
 using System.Reflection;
 using dailycue_api;
+using dailycue_api.DTO.Reponses;
 using dailycue_api.Entities;
 using Microsoft.OpenApi.Models;
 
@@ -48,19 +49,35 @@ app.MapGet(
 
 app.MapPost(
     "/register",
-    async (DailyCueContext dbContext, User user) =>
+    async (DailyCueContext dbContext, RegisterUserRequest registerUser) =>
     {
-        //logic register here
+        var user = new User
+        {
+            Username = registerUser.Username,
+            Email = registerUser.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerUser.Password, workFactor: 12),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync();
 
-        return Results.Ok(new { Message = "User registered successfully", User = user });
+        return Results.Created(
+            $"/users/{user.Id}",
+            new { Message = "User registered successfully", User = user }
+        );
     }
 );
 app.MapPost(
     "/login",
-    async (DailyCueContext dbContext, string username, string password) =>
+    (DailyCueContext dbContext, string email, string password) =>
     {
-        //logic login here
-        return Results.Ok();
+        var user = dbContext.Users.FirstOrDefault(u => u.Email == email);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        {
+            return Results.BadRequest(new { Message = "Invalid email or password" });
+        }
+        return Results.Ok(new { Message = "Login successful" });
     }
 );
 app.MapPost(
@@ -69,6 +86,14 @@ app.MapPost(
     {
         // Logic to validate the ID token with Google's OAuth2 API
         return Results.Ok(new { Message = "Google login successful", IdToken = idToken });
+    }
+);
+
+app.MapPost("/google-register",
+    (string idToken) =>
+    {
+        // Logic to validate the ID token with Google's OAuth2 API and register the user
+        return Results.Ok(new { Message = "Google registration successful", IdToken = idToken });
     }
 );
 

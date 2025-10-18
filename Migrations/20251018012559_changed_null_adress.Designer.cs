@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dailycue_api;
@@ -11,9 +12,11 @@ using dailycue_api;
 namespace dailycue_api.Migrations
 {
     [DbContext(typeof(DailyCueContext))]
-    partial class DailyCueContextModelSnapshot : ModelSnapshot
+    [Migration("20251018012559_changed_null_adress")]
+    partial class changed_null_adress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
