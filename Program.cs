@@ -2,6 +2,7 @@ using System.Reflection;
 using dailycue_api;
 using dailycue_api.DTO.Reponses;
 using dailycue_api.Entities;
+using Google.Apis.Auth;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -82,14 +83,25 @@ app.MapPost(
 );
 app.MapPost(
     "/google-login",
-    (string idToken) =>
+    async (DailyCueContext dbContext, string idToken) =>
     {
-        // Logic to validate the ID token with Google's OAuth2 API
-        return Results.Ok(new { Message = "Google login successful", IdToken = idToken });
+        var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+        if (payload == null)
+        {
+            return Results.BadRequest(new { Message = "Invalid ID token" });
+        }
+        var useremail = payload.Email;
+        var user = dbContext.Users.FirstOrDefault(u => u.Email == useremail);
+        if (user == null)
+        {
+            return Results.BadRequest(new { Message = "User not found" });
+        }
+        return Results.Ok(new { Message = "Google login successful" });
     }
 );
 
-app.MapPost("/google-register",
+app.MapPost(
+    "/google-register",
     (string idToken) =>
     {
         // Logic to validate the ID token with Google's OAuth2 API and register the user
