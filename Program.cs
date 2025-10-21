@@ -53,7 +53,7 @@ app.MapPost(
     {
         var user = new User
         {
-            Username = registerUser.Username,
+            Name = registerUser.Name,
             Email = registerUser.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerUser.Password, workFactor: 12),
             CreatedAt = DateTime.UtcNow,

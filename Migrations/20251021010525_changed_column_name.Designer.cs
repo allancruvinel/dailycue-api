@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dailycue_api;
@@ -11,9 +12,11 @@ using dailycue_api;
 namespace dailycue_api.Migrations
 {
     [DbContext(typeof(DailyCueContext))]
-    partial class DailyCueContextModelSnapshot : ModelSnapshot
+    [Migration("20251021010525_changed_column_name")]
+    partial class changed_column_name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,7 +151,7 @@ namespace dailycue_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Users");
