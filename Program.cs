@@ -102,10 +102,28 @@ app.MapPost(
 
 app.MapPost(
     "/google-register",
-    (string idToken) =>
+    async (DailyCueContext dbContext, string idToken) =>
     {
-        // Logic to validate the ID token with Google's OAuth2 API and register the user
-        return Results.Ok(new { Message = "Google registration successful", IdToken = idToken });
+        var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+        if (payload == null)
+        {
+            return Results.BadRequest(new { Message = "Invalid ID token" });
+        }
+        var user = new User
+        {
+            Name = payload.Name,
+            Email = payload.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString() , workFactor: 12),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync();
+
+        return Results.Created(
+            $"/users/{user.Id}",
+            new { Message = "User registered successfully", User = user }
+        );
     }
 );
 
