@@ -1,8 +1,11 @@
 using System.Reflection;
+
 using dailycue_api;
 using dailycue_api.DTO.Requests;
 using dailycue_api.Entities;
+
 using Google.Apis.Auth;
+
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);

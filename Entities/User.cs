@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace dailycue_api.Entities;
