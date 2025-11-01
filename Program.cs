@@ -1,17 +1,42 @@
 using System.Reflection;
+using System.Text;
 
 using dailycue_api;
 using dailycue_api.DTO.Requests;
 using dailycue_api.Entities;
+using dailycue_api.Utils;
 
 using Google.Apis.Auth;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DailyCueContext>();
 
 builder.Services.AddEndpointsApiExplorer();
+
+// Configure JWT Bearer Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // Your secret key
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "DailyCue API", Version = "v1" });
@@ -27,6 +52,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddCors();
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -83,7 +111,7 @@ app.MapPost(
         {
             return Results.BadRequest(new { Message = "Usuario ou senha inválidos" });
         }
-        string jwtToken = "fake-jwt-token-for-demo-purposes";
+
 
         var cookieOptions = new CookieOptions
         {
@@ -92,6 +120,14 @@ app.MapPost(
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddHours(4)
         };
+
+        var jwtToken = JwtTokenGenerator.GenerateToken(
+            user,
+            builder.Configuration["Jwt:Key"],
+            builder.Configuration["Jwt:Issuer"],
+            builder.Configuration["Jwt:Audience"]
+        );
+
         response.Cookies.Append("Auth", jwtToken, cookieOptions);
 
         return Results.Ok(new { Message = "Login successful", Token = jwtToken });
@@ -112,7 +148,13 @@ app.MapPost(
         {
             return Results.BadRequest(new { Message = "User not found" });
         }
-        return Results.Ok(new { Message = "Google login successful" });
+        var jwtToken = JwtTokenGenerator.GenerateToken(
+            user,
+            builder.Configuration["Jwt:Key"],
+            builder.Configuration["Jwt:Issuer"],
+            builder.Configuration["Jwt:Audience"]
+        );
+        return Results.Ok(new { Message = "Google login successful", Token = jwtToken });
     }
 );
 
