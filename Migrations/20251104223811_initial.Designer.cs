@@ -12,8 +12,8 @@ using dailycue_api;
 namespace dailycue_api.Migrations
 {
     [DbContext(typeof(DailyCueContext))]
-    [Migration("20251021010525_changed_column_name")]
-    partial class changed_column_name
+    [Migration("20251104223811_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,8 +48,8 @@ namespace dailycue_api.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("WebhookUrl")
                         .HasColumnType("text");
@@ -124,11 +124,9 @@ namespace dailycue_api.Migrations
 
             modelBuilder.Entity("dailycue_api.Entities.User", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -151,7 +149,7 @@ namespace dailycue_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Email")
                         .IsUnique();
 
                     b.ToTable("Users");

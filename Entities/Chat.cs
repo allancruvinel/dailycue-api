@@ -10,7 +10,7 @@ public class Chat
     public long Id { get; set; }
 
     [ForeignKey("User")]
-    public long UserId { get; set; }
+    public Guid UserId { get; set; }
     public required User User { get; set; }
     public string? Name { get; set; }
     public string? Provider { get; set; }

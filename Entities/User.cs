@@ -9,7 +9,7 @@ namespace dailycue_api.Entities;
 public class User
 {
     [Key]
-    public long Id { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(200)]
     public required string Name { get; set; }

@@ -67,6 +67,7 @@ app.MapGet(
     "/status",
     (DailyCueContext dbContext) =>
     {
+        var assembly = Assembly.GetEntryAssembly();
         bool dbIsConnected;
         dbIsConnected = dbContext.Database.CanConnect();
 
@@ -76,6 +77,7 @@ app.MapGet(
                 Status = "OK",
                 DatabaseConnected = dbIsConnected,
                 Timestamp = DateTime.UtcNow,
+                Version = assembly?.GetName().Version?.ToString() ?? "unknown"
             }
         );
     }

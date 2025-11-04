@@ -7,6 +7,7 @@
     <RootNamespace>dailycue_api</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <Version>0.1.0-beta1</Version>
   </PropertyGroup>
   <Target Name="InstallHusky" BeforeTargets="Build">
     <Exec Command="dotnet husky install" />
