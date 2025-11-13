@@ -9,11 +9,10 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
     <Version>0.1.0-beta1</Version>
   </PropertyGroup>
-  <!--
+  
   <Target Name="InstallHusky" BeforeTargets="Build">
     <Exec Command="dotnet husky install" />
   </Target>
-  -->
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

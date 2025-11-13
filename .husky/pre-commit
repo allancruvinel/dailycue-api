@@ -4,7 +4,7 @@
 echo 'Ready to commit changes!'
 
 echo 'Format'
-
+dotnet husky run --name dotnet-format-staged-files
 
 echo 'Build'
 
