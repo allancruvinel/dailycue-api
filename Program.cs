@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using dailycue_api;
@@ -14,6 +15,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<Env>(builder.Configuration);
+var env = builder.Configuration.Get<Env>();
+if (env == null)
+{
+    throw new Exception("Fail to load environment variables");
+}
+env.Validate();
+builder.Services.AddSingleton(env);
+
 builder.Services.AddDbContext<DailyCueContext>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -29,9 +39,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // Your secret key
+            ValidIssuer = env.Jwt.Issuer,
+            ValidAudience = env.Jwt.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(env.Jwt.Key)) // Your secret key
         };
     });
 
@@ -106,7 +116,7 @@ app.MapPost(
 );
 app.MapPost(
     "/login",
-    (DailyCueContext dbContext, LoginUserRequest loginRequest, HttpResponse response) =>
+    (Env env, DailyCueContext dbContext, LoginUserRequest loginRequest, HttpResponse response) =>
     {
         var user = dbContext.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.PasswordHash))
@@ -125,9 +135,9 @@ app.MapPost(
 
         var jwtToken = JwtTokenGenerator.GenerateToken(
             user,
-            builder.Configuration["Jwt:Key"],
-            builder.Configuration["Jwt:Issuer"],
-            builder.Configuration["Jwt:Audience"]
+            env.Jwt.Key,
+            env.Jwt.Issuer,
+            env.Jwt.Audience
         );
 
         response.Cookies.Append("Auth", jwtToken, cookieOptions);
@@ -152,9 +162,9 @@ app.MapPost(
         }
         var jwtToken = JwtTokenGenerator.GenerateToken(
             user,
-            builder.Configuration["Jwt:Key"],
-            builder.Configuration["Jwt:Issuer"],
-            builder.Configuration["Jwt:Audience"]
+            env.Jwt.Key,
+            env.Jwt.Issuer,
+            env.Jwt.Audience
         );
         return Results.Ok(new { Message = "Google login successful", Token = jwtToken });
     }
