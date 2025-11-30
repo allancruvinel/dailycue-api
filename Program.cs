@@ -5,6 +5,9 @@ using System.Text;
 using dailycue_api;
 using dailycue_api.DTO.Requests;
 using dailycue_api.Entities;
+using dailycue_api.Exceptions;
+using dailycue_api.Exceptions.CustomExceptions;
+using dailycue_api.Exceptions.Handlers;
 using dailycue_api.Utils;
 
 using Google.Apis.Auth;
@@ -15,6 +18,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddProblemDetails();
+
 builder.Services.Configure<Env>(builder.Configuration);
 var env = builder.Configuration.Get<Env>();
 if (env == null)
@@ -62,6 +71,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddCors();
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();
