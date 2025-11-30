@@ -210,6 +210,22 @@ app.MapPost(
     }
 );
 
+app.MapGet("/me", [Microsoft.AspNetCore.Authorization.Authorize] (DailyCueContext dbContext, HttpContext httpContext) =>
+{
+    var userIdClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id");
+    if (userIdClaim == null)
+    {
+        return Results.Unauthorized();
+    }
+    var userId = Guid.Parse(userIdClaim.Value);
+    var user = dbContext.Users.FirstOrDefault(u => u.Id == userId);
+    if (user == null)
+    {
+        return Results.NotFound(new { Message = "User not found" });
+    }
+    return Results.Ok(new { username = user.Name, email = user.Email });
+});
+
 app.UseCors(policy =>
 {
     _ = policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
