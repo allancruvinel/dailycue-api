@@ -6,13 +6,13 @@ using dailycue_api;
 using dailycue_api.DTO.Requests;
 using dailycue_api.Entities;
 using dailycue_api.Exceptions;
-using dailycue_api.Exceptions.CustomExceptions;
 using dailycue_api.Exceptions.Handlers;
 using dailycue_api.Utils;
 
 using Google.Apis.Auth;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -210,7 +210,7 @@ app.MapPost(
     }
 );
 
-app.MapGet("/me", [Microsoft.AspNetCore.Authorization.Authorize] (DailyCueContext dbContext, HttpContext httpContext) =>
+app.MapGet("/me", [Authorize] (DailyCueContext dbContext, HttpContext httpContext) =>
 {
     var userIdClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id");
     if (userIdClaim == null)
@@ -223,7 +223,7 @@ app.MapGet("/me", [Microsoft.AspNetCore.Authorization.Authorize] (DailyCueContex
     {
         return Results.NotFound(new { Message = "User not found" });
     }
-    return Results.Ok(new { username = user.Name, email = user.Email });
+    return Results.Ok(new { id = user.Id, name = user.Name, email = user.Email });
 });
 
 app.UseCors(policy =>
