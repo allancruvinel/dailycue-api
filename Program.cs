@@ -52,6 +52,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = env.Jwt.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(env.Jwt.Key)) // Your secret key
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+
+                if (context.Request.Cookies.ContainsKey("Auth"))
+                {
+                    context.Token = context.Request.Cookies["Auth"];
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -68,11 +81,22 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-builder.Services.AddCors();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 app.UseExceptionHandler();
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -139,7 +163,9 @@ app.MapPost(
         {
             HttpOnly = true,
             //Secure = app.Environment.IsProduction(), // true in production
-            SameSite = SameSiteMode.Strict,
+            Secure = false,
+            Path = "/",
+            SameSite = SameSiteMode.Lax,
             Expires = DateTimeOffset.UtcNow.AddHours(4)
         };
 
@@ -157,7 +183,7 @@ app.MapPost(
 );
 app.MapPost(
     "/google-login",
-    async (DailyCueContext dbContext, TokenRequest tokenRequest) =>
+    async (DailyCueContext dbContext, TokenRequest tokenRequest, HttpResponse response) =>
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(tokenRequest.Token);
         if (payload == null)
@@ -176,6 +202,18 @@ app.MapPost(
             env.Jwt.Issuer,
             env.Jwt.Audience
         );
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            //Secure = app.Environment.IsProduction(), // true in production
+            Secure = false,
+            Path = "/",
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddHours(4)
+        };
+
+        response.Cookies.Append("Auth", jwtToken, cookieOptions);
         return Results.Ok(new { Message = "Google login successful", Token = jwtToken });
     }
 );
@@ -226,9 +264,6 @@ app.MapGet("/me", [Authorize] (DailyCueContext dbContext, HttpContext httpContex
     return Results.Ok(new { id = user.Id, name = user.Name, email = user.Email });
 });
 
-app.UseCors(policy =>
-{
-    _ = policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-});
+
 
 app.Run();
