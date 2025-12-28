@@ -6,12 +6,13 @@ using Google.Apis.Auth;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace dailycue_api.Controllers;
+namespace dailycue_api.Controllers.V1;
 
 [ApiController]
+[Route("v1")]
 public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
 {
-    [HttpPost("/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest registerUser)
     {
         var user = new User
@@ -31,7 +32,7 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         );
     }
 
-    [HttpPost("/login")]
+    [HttpPost("login")]
     public async Task<IActionResult> LoginAsync([FromBody] LoginUserRequest loginRequest)
     {
         var user = dbContext.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
@@ -62,7 +63,7 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         return Ok(new { Message = "Login successful", Token = jwtToken });
     }
 
-    [HttpPost("/google-login")]
+    [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLoginAsync([FromBody] TokenRequest tokenRequest)
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(tokenRequest.Token);
@@ -97,7 +98,7 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         return Ok(new { Message = "Google login successful", Token = jwtToken });
     }
 
-    [HttpPost("/google-register")]
+    [HttpPost("google-register")]
     public async Task<IActionResult> GoogleRegisterAsync([FromBody] TokenRequest tokenRequest)
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(tokenRequest.Token);
