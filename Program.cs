@@ -101,7 +101,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.MapGet(
-    "/status",
+    "v1/status",
     (DailyCueContext dbContext) =>
     {
         var assembly = Assembly.GetEntryAssembly();
@@ -119,7 +119,7 @@ app.MapGet(
         );
     }
 );
-app.MapGet("/me", [Authorize] (DailyCueContext dbContext, HttpContext httpContext) =>
+app.MapGet("v1/me", [Authorize] (DailyCueContext dbContext, HttpContext httpContext) =>
 {
     var userIdClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == "id");
     if (userIdClaim == null)
