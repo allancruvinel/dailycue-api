@@ -126,4 +126,10 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         );
     }
 
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("Auth");
+        return Ok(new { Message = "Logout successful" });
+    }
 }
