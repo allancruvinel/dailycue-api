@@ -23,6 +23,7 @@ public class DailyCueContext : DbContext
     public DbSet<Entities.Chat> Chats { get; set; }
     public DbSet<Entities.Tip> Tips { get; set; }
     public DbSet<Entities.TipSchedule> TipSchedules { get; set; }
+    public DbSet<Entities.UserSettings> UserSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
