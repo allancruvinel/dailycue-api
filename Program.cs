@@ -111,10 +111,14 @@ app.MapGet(
         return Results.Ok(
             new
             {
-                Status = "OK",
-                DatabaseConnected = dbIsConnected,
-                Timestamp = DateTime.UtcNow,
-                Version = assembly?.GetName().Version?.ToString() ?? "unknown"
+                Message = "Status obtido com sucesso",
+                Status = new
+                {
+                    ApplicationStatus = "OK",
+                    DatabaseConnected = dbIsConnected,
+                    Timestamp = DateTime.UtcNow,
+                    Version = assembly?.GetName().Version?.ToString() ?? "unknown"
+                }
             }
         );
     }
@@ -130,9 +134,20 @@ app.MapGet("v1/me", [Authorize] (DailyCueContext dbContext, HttpContext httpCont
     var user = dbContext.Users.FirstOrDefault(u => u.Id == userId);
     if (user == null)
     {
-        return Results.NotFound(new { Message = "User not found" });
+        return Results.NotFound(new { Message = "Usuário não encontrado" });
     }
-    return Results.Ok(new { id = user.Id, name = user.Name, email = user.Email });
+    return Results.Ok(new
+    {
+        Message = "Usuário autenticado obtido com sucesso",
+        User = new
+        {
+            user.Id,
+            user.Name,
+            user.Email,
+            user.CreatedAt,
+            user.UpdatedAt
+        }
+    });
 });
 
 

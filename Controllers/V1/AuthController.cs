@@ -27,8 +27,12 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         await dbContext.SaveChangesAsync();
 
         return Created(
-            $"/users/{user.Id}",
-            new { Message = "User registered successfully", User = user }
+            $"/v1/users/{user.Id}",
+            new
+            {
+                Message = "Usuário registrado com sucesso",
+                User = ToUserResponse(user)
+            }
         );
     }
 
@@ -60,7 +64,12 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         );
         Response.Cookies.Append("Auth", jwtToken, cookieOptions);
 
-        return Ok(new { Message = "Login successful", Token = jwtToken });
+        return Ok(new
+        {
+            Message = "Login realizado com sucesso",
+            Token = jwtToken,
+            User = ToUserResponse(user)
+        });
     }
 
     [HttpPost("google-login")]
@@ -69,13 +78,13 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         var payload = await GoogleJsonWebSignature.ValidateAsync(tokenRequest.Token);
         if (payload == null)
         {
-            return BadRequest(new { Message = "Invalid ID token" });
+            return BadRequest(new { Message = "Token de autenticação inválido" });
         }
         var useremail = payload.Email;
         var user = dbContext.Users.FirstOrDefault(u => u.Email == useremail);
         if (user == null)
         {
-            return BadRequest(new { Message = "User not found" });
+            return BadRequest(new { Message = "Usuário não encontrado" });
         }
         var jwtToken = JwtTokenGenerator.GenerateToken(
             user,
@@ -95,7 +104,12 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         };
 
         Response.Cookies.Append("Auth", jwtToken, cookieOptions);
-        return Ok(new { Message = "Google login successful", Token = jwtToken });
+        return Ok(new
+        {
+            Message = "Login com Google realizado com sucesso",
+            Token = jwtToken,
+            User = ToUserResponse(user)
+        });
     }
 
     [HttpPost("google-register")]
@@ -104,7 +118,7 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         var payload = await GoogleJsonWebSignature.ValidateAsync(tokenRequest.Token);
         if (payload == null)
         {
-            return BadRequest(new { Message = "Invalid ID token" });
+            return BadRequest(new { Message = "Token de autenticação inválido" });
         }
         var user = new User
         {
@@ -121,8 +135,12 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
         await dbContext.SaveChangesAsync();
 
         return Created(
-            $"/users/{user.Id}",
-            new { Message = "User registered successfully", User = user }
+            $"/v1/users/{user.Id}",
+            new
+            {
+                Message = "Usuário registrado com Google com sucesso",
+                User = ToUserResponse(user)
+            }
         );
     }
 
@@ -130,6 +148,18 @@ public class AuthController(DailyCueContext dbContext, Env env) : ControllerBase
     public IActionResult Logout()
     {
         Response.Cookies.Delete("Auth");
-        return Ok(new { Message = "Logout successful" });
+        return Ok(new { Message = "Logout realizado com sucesso" });
+    }
+
+    private static object ToUserResponse(User user)
+    {
+        return new
+        {
+            user.Id,
+            user.Name,
+            user.Email,
+            user.CreatedAt,
+            user.UpdatedAt
+        };
     }
 }
