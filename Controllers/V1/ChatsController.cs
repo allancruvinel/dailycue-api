@@ -102,7 +102,7 @@ public class ChatsController(DailyCueContext dbContext) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPaginatedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetPaginatedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? chatName = null)
     {
         var userId = GetAuthenticatedUserId();
         if (userId == null)
@@ -116,7 +116,8 @@ public class ChatsController(DailyCueContext dbContext) : ControllerBase
 
         var query = dbContext.Chats
             .AsNoTracking()
-            .Where(c => c.UserId == authenticatedUserId)
+            .Where(c => c.UserId == authenticatedUserId
+                && (string.IsNullOrEmpty(chatName) || c.Name != null && c.Name.Contains(chatName)))
             .OrderByDescending(c => c.CreatedAt);
 
         var totalItems = await query.CountAsync();
